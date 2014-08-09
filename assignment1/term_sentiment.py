@@ -4,40 +4,66 @@ import json
 from collections import defaultdict
 
 
-def main():
+
+def load_scores(filepath):
     scores = {}
-    with open(sys.argv[1]) as file:
+
+    with open(filepath) as file:
         for line in file:
             term, score  = line.split("\t")
             scores[term] = int(score)
 
-    sentiments = {}
-    with open(sys.argv[2]) as file:
-        for line in file:
-            data = json.loads(line)
-            sentiment = 0
-            if 'text' in data:
-                tweet = data['text']
-                words = tweet.split(' ')
-                for word in words:
-                    word = word.lower()
-                    if word in scores:
-                        sentiment += scores[word]
-                sentiments[tweet] = sentiment
+    return scores
 
+
+
+def sentiment_by_tweet(lines, scores):
+    sentiments = {}
+
+    for data in lines:
+        if 'text' in data:
+            sentiment = 0
+            tweet = data['text']
+            for word in tweet.split(' '):
+                word = word.lower()
+                if word in scores:
+                    sentiment += scores[word]
+            sentiments[tweet] = sentiment
+
+    return sentiments
+
+
+
+def sentiment_by_term(sentiments):
     terms  = defaultdict(int)
     counts = defaultdict(int)
+
     for tweet, sentiment in sentiments.iteritems():
-        words = tweet.split(' ')
-        for word in words:
+        for word in tweet.split(' '):
             word = word.lower()
             if word != '':
                 terms[word]  += sentiment
                 counts[word] += 1
 
+    return terms, counts
+
+
+
+def main(argv):
+    lines = []
+
+    with open(argv[1]) as file:
+        for line in file:
+            lines.append(json.loads(line))
+
+    scores        = load_scores(argv[0])
+    sentiments    = sentiment_by_tweet(lines, scores)
+    terms, counts = sentiment_by_term(sentiments)
+
     for term, sentiment in terms.iteritems():
         print '%s %s' % (term.encode('utf-8'), float(sentiment) / counts[term])
 
 
+
 if __name__ == '__main__':
-    main()
+    main(sys.argv[1:])

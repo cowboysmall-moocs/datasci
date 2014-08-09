@@ -4,6 +4,7 @@ import json
 from collections import defaultdict
 
 
+
 STATE_BOUNDING_BOXES = {
     'AL': [-88.4711, 30.2198, -84.8892, 35.0012],
     'AK': [172.4613, 51.2184, -129.9863, 71.3516],
@@ -60,6 +61,7 @@ STATE_BOUNDING_BOXES = {
 }
 
 
+
 def find_state(coordinates):
     for state, values in STATE_BOUNDING_BOXES.iteritems():
         if values[0] < coordinates[0][0] and values[2] > coordinates[2][0] and values[1] < coordinates[0][1] and values[3] > coordinates[2][1]:
@@ -67,38 +69,62 @@ def find_state(coordinates):
     return None
 
 
-def main():
+
+def load_scores(filepath):
     scores = {}
-    with open(sys.argv[1]) as file:
+
+    with open(filepath) as file:
         for line in file:
             term, score  = line.split("\t")
             scores[term] = int(score)
 
-    states_score = defaultdict(int)
-    with open(sys.argv[2]) as file:
-        for line in file:
-            data = json.loads(line)
-            if 'text' in data:
-                if 'place' in data:
-                    place = data['place']
-                    if place and 'bounding_box' in place:
-                        bounding_box = place['bounding_box']
-                        if bounding_box and 'coordinates' in bounding_box:
-                            coordinates = bounding_box['coordinates']
-                            state = find_state(coordinates[0])
-                            if state:
-                                sentiment = 0
-                                tweet = data['text']
-                                words = tweet.split(' ')
-                                for word in words:
-                                    word = word.lower()
-                                    if word in scores:
-                                        sentiment += scores[word]
-                                states_score[state] += sentiment
+    return scores
 
-    score_states = {score: state for state, score in states_score.iteritems()}
-    print score_states[sorted(score_states.keys())[-1]]
+
+
+def sentiment_by_state(lines, scores):
+    states_score = defaultdict(int)
+
+    for data in lines:
+        if 'text' in data and 'place' in data:
+            place = data['place']
+            if place and 'bounding_box' in place:
+                bounding_box = place['bounding_box']
+                if bounding_box and 'coordinates' in bounding_box:
+                    coordinates = bounding_box['coordinates']
+
+                    state = find_state(coordinates[0])
+                    if state:
+                        sentiment = 0
+                        words = data['text'].split(' ')
+                        for word in words:
+                            word = word.lower()
+                            if word in scores:
+                                sentiment += scores[word]
+                        states_score[state] += sentiment
+
+    return states_score
+
+
+
+def main(argv):
+    lines = []
+
+    with open(argv[1]) as file:
+        for line in file:
+            lines.append(json.loads(line))
+
+
+    scores     = load_scores(argv[0])
+    sentiments = sentiment_by_state(lines, scores)
+
+    score_states = {score: state for state, score in sentiments.iteritems()}
+
+    print 
+    print 'state with greatest sentiment: ', score_states[max(score_states.keys())]
+    print 
+
 
 
 if __name__ == '__main__':
-    main()
+    main(sys.argv[1:])

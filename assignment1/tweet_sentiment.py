@@ -2,25 +2,53 @@ import sys
 import json
 
 
-def main():
+
+def load_scores(filepath):
     scores = {}
-    with open(sys.argv[1]) as file:
+
+    with open(filepath) as file:
         for line in file:
             term, score  = line.split("\t")
             scores[term] = int(score)
 
-    with open(sys.argv[2]) as file:
-        for line in file:
-            data = json.loads(line)
+    return scores
+
+
+
+def sentiment_by_tweet(lines, scores):
+    sentiments = {}
+
+    for data in lines:
+        if 'text' in data:
             sentiment = 0
-            if 'text' in data:
-                words = data['text'].split(' ')
-                for word in words:
-                    word = word.lower()
-                    if word in scores:
-                        sentiment += scores[word]
-            print sentiment
+            tweet = data['text']
+            for word in tweet.split(' '):
+                word = word.lower()
+                if word in scores:
+                    sentiment += scores[word]
+            sentiments[tweet] = sentiment
+
+    return sentiments
+
+
+
+def main(argv):
+    lines = []
+
+    with open(argv[1]) as file:
+        for line in file:
+            lines.append(json.loads(line))
+
+    scores     = load_scores(argv[0])
+    sentiments = sentiment_by_tweet(lines, scores)
+
+    # for tweet, sentiment in sentiments.iteritems():
+    #     print '%s %s' % (tweet.encode('utf-8'), sentiment)
+
+    for sentiment in sentiments.values():
+        print sentiment
+
 
 
 if __name__ == '__main__':
-    main()
+    main(sys.argv[1:])

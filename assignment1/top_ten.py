@@ -4,20 +4,30 @@ import json
 from collections import defaultdict
 
 
-def main():
-    hashtag_counts = defaultdict(int)
-    total  = 0
-    with open(sys.argv[1]) as file:
-        for line in file:
-            data = json.loads(line)
-            if 'entities' in data:
-                entities = data['entities']
-                if 'hashtags' in entities:
-                    hashtags = entities['hashtags']
-                    for hashtag in hashtags:
-                        text = hashtag['text'].lower()
-                        hashtag_counts[text] += 1
 
+def count_by_hashtag(lines):
+    hashtag_counts = defaultdict(int)
+
+    for data in lines:
+        if 'entities' in data:
+            entities = data['entities']
+            if 'hashtags' in entities:
+                for hashtag in entities['hashtags']:
+                    text = hashtag['text'].lower()
+                    hashtag_counts[text] += 1
+
+    return hashtag_counts
+
+
+
+def main(argv):
+    lines = []
+
+    with open(argv[0]) as file:
+        for line in file:
+            lines.append(json.loads(line))
+
+    hashtag_counts = count_by_hashtag(lines)
     counts_hashtag = sorted([(value, text) for text, value in hashtag_counts.iteritems()], reverse = True)
 
     for count, hashtag in counts_hashtag[0:10]:
@@ -25,4 +35,4 @@ def main():
 
 
 if __name__ == '__main__':
-    main()
+    main(sys.argv[1:])
