@@ -1,91 +1,39 @@
 import sys
-import pandas
-import numpy
-import statsmodels.api as sm
+
+import pandas as pd
+import numpy as np
+
+from scipy.stats import mode
 
 
-from predict import predict
-from patsy import dmatrices
-from pandas import Series, DataFrame
-from sklearn import svm
+def clean_data(file_path):
+    df = pd.read_csv(file_path)
 
+    df.Fare = df.Fare.map(lambda x: np.nan if x == 0 else x)
 
+    classmeans = df.pivot_table('Fare', index = 'Pclass', aggfunc = 'mean')
+    df.Fare = df[['Fare', 'Pclass']].apply(lambda x: int(classmeans[x['Pclass']]) if pd.isnull(x['Fare']) else x['Fare'], axis = 1)
+    # classmedians = df.pivot_table('Fare', index = 'Pclass', aggfunc = 'median')
+    # df.Fare = df[['Fare', 'Pclass']].apply(lambda x: classmedians[int(x['Pclass'])] if pd.isnull(x['Fare']) else x['Fare'], axis = 1)
+
+    df.Age = df.Age.fillna(np.mean(df.Age))
+    # df.Age = df.Age.fillna(np.median(df.Age))
+
+    df.Sex = df.Sex.apply(lambda x: 0 if x == 'male' else 1)
+
+    modeEmbarked = mode(df.Embarked)[0][0]
+    df.Embarked  = df.Embarked.fillna(modeEmbarked)
+    embarked = {'S': 2, 'C': 1, 'Q': 0}
+    df.Embarked = df.Embarked.apply(lambda x: embarked[x])
+
+    df.Cabin = df.Cabin.fillna('Data Missing')
+
+    return df
 
 
 def main(argv):
-    train = pandas.read_csv('./data/train.csv')
-    test  = pandas.read_csv('./data/test.csv')
-
-    # print train
-
-    # train = train.drop(['Ticket', 'Cabin'], axis = 1)
-    # train = train.dropna()
-
-    # results = {}
-
-    # formula = 'Survived ~ C(Pclass) + C(Sex) + Age + SibSp  + C(Embarked)'
-    # y, X = dmatrices(formula, data = train, return_type = 'dataframe')
-    # result = sm.Logit(y, X).fit()
-
-    # results['Logit'] = [result, formula]
-
-    # test['Survived'] = 0
-
-    # compared_resuts  = Series(predict(test, results, 'Logit'))     
-    # compared_resuts.to_csv('./output/logit.csv')
-    # print compared_resuts
-
-
-
-    # print train.head()
-    # print test.head()
-
-
-    # data1 = train.drop('Survived', 1)
-    # data1 = data1.drop('Pclass', 1)
-    # data1 = data1.drop('Name', 1)
-    # data1 = data1.drop('Sex', 1)
-    # data1 = data1.drop('Age', 1)
-    # data1 = data1.drop('SibSp', 1)
-    # data1 = data1.drop('Parch', 1)
-    # data1 = data1.drop('Ticket', 1)
-    # # data1 = data1.drop('Fare', 1)
-    # data1 = data1.drop('Cabin', 1)
-    # data1 = data1.drop('Embarked', 1)
-    # data1 = data1.fillna(data1.mean())
-
-
-    # print train['Survived']
-
-    # clf = svm.SVC(gamma = 0.001, C = 100.)
-    # clf.fit(data1, train['Survived'])
-
-
-    # data2 = test.drop('Name', 1)
-    # data2 = data2.drop('Pclass', 1)
-    # data2 = data2.drop('Sex', 1)
-    # data2 = data2.drop('Age', 1)
-    # data2 = data2.drop('SibSp', 1)
-    # data2 = data2.drop('Parch', 1)
-    # data2 = data2.drop('Ticket', 1)
-    # # data2 = data2.drop('Fare', 1)
-    # data2 = data2.drop('Cabin', 1)
-    # data2 = data2.drop('Embarked', 1)
-    # data2 = data2.fillna(data2.mean())
-
-
-    # count = 0
-    # for index, row in data2.iterrows():
-    #     if result.predict(row)[0] == 1:
-    #         count += 1
-
-    # print
-    # print '   total -> %s' % (len(data2))
-    # print 'survived -> %s' % (count)
-    # print
-
-
-
+    df = clean_data(argv[0])
+    print df.describe()
 
 
 if __name__ == '__main__':
