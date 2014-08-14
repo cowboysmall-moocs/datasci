@@ -115,8 +115,8 @@ def main(argv):
             lines.append(json.loads(line))
 
 
-    scores     = load_scores(argv[0])
-    sentiments = sentiment_by_state(lines, scores)
+    scores       = load_scores(argv[0])
+    sentiments   = sentiment_by_state(lines, scores)
 
     score_states = {score: state for state, score in sentiments.iteritems()}
 

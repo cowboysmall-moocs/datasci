@@ -4,6 +4,8 @@
 **/*.pyc
 **/*.py[cod]
 
+**/data
+**/*.zip
 
 *.egg
 *.egg-info
