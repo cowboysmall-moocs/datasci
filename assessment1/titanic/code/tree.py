@@ -1,18 +1,15 @@
 import sys
 import csv
 
-from sklearn import preprocessing, metrics, svm
+from sklearn import metrics, tree
 from clean import clean_data
 
 
 def fit_model(data, target):
-    clf = svm.SVC(gamma = 0.0001, C = 50000.)
-    # clf = svm.SVC(kernel = 'poly', gamma = 0.01, degree = 2, C = 50.)
-    # clf = svm.SVC(kernel = 'rbf', gamma = 0.01, C = 5.)
-    # clf = svm.LinearSVC(C = 5)
-    clf.fit(data, target)
+    decisiom_tree = tree.DecisionTreeClassifier(criterion = "entropy")
+    decisiom_tree.fit(data, target)
 
-    return clf
+    return decisiom_tree
 
 
 def evaluate(clf, results, target, heading):
@@ -65,7 +62,7 @@ def main(argv):
 
 
 
-    with open('./output/prediction_svm.csv', 'wb') as csvfile:
+    with open('./output/prediction_tree.csv', 'wb') as csvfile:
         writer = csv.writer(csvfile)
         writer.writerow(['PassengerId', 'Survived'])
         for i in xrange(len(results)):
