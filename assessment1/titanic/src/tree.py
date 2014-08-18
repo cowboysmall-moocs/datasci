@@ -62,7 +62,7 @@ def main(argv):
 
 
 
-    with open('./output/prediction_tree.csv', 'wb') as csvfile:
+    with open('./prediction_tree.csv', 'wb') as csvfile:
         writer = csv.writer(csvfile)
         writer.writerow(['PassengerId', 'Survived'])
         for i in xrange(len(results)):

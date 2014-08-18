@@ -1,15 +1,19 @@
 import sys
 import csv
 
-from sklearn import metrics, linear_model
+from sklearn import preprocessing, metrics, svm
 from clean import clean_data
 
 
 def fit_model(data, target):
-    logistic = linear_model.LogisticRegression(C = 1e5)
-    logistic.fit(data, target)
+    clf = svm.SVC(gamma = 0.1, C = 1.)
+    # clf = svm.SVC(kernel = 'poly', gamma = 0.01, degree = 2, C = 50.)
+    # clf = svm.SVC(kernel = 'rbf', gamma = 0.01, C = 5.)
+    # clf = svm.SVC(kernel = 'sigmoid', gamma = 0.01, C = 5.)
+    # clf = svm.LinearSVC(C = 5)
+    clf.fit(data, target)
 
-    return logistic
+    return clf
 
 
 def evaluate(clf, results, target, heading):
@@ -35,6 +39,7 @@ def main(argv):
 
     target = df['Survived'].values
     data   = df.drop(['PassengerId', 'Name', 'Ticket', 'Cabin', 'Fare', 'Survived'], 1).values
+    data   = preprocessing.scale(data)
 
     total       = len(data)
     train_count = int(total * 0.6)
@@ -57,12 +62,13 @@ def main(argv):
     df2  = clean_data(argv[1])
     ids  = df2['PassengerId'].values
     data = df2.drop(['PassengerId', 'Name', 'Ticket', 'Cabin', 'Fare'], 1).values
+    data = preprocessing.scale(data)
 
     results = clf.predict(data)
 
 
 
-    with open('./output/prediction_logit.csv', 'wb') as csvfile:
+    with open('./prediction_svm.csv', 'wb') as csvfile:
         writer = csv.writer(csvfile)
         writer.writerow(['PassengerId', 'Survived'])
         for i in xrange(len(results)):

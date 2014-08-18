@@ -1,18 +1,15 @@
 import sys
 import csv
 
-from sklearn import preprocessing, metrics, svm
+from sklearn import metrics, linear_model
 from clean import clean_data
 
 
 def fit_model(data, target):
-    clf = svm.SVC(gamma = 0.0001, C = 50000.)
-    # clf = svm.SVC(kernel = 'poly', gamma = 0.01, degree = 2, C = 50.)
-    # clf = svm.SVC(kernel = 'rbf', gamma = 0.01, C = 5.)
-    # clf = svm.LinearSVC(C = 5)
-    clf.fit(data, target)
+    logistic = linear_model.LogisticRegression(C = 1e5)
+    logistic.fit(data, target)
 
-    return clf
+    return logistic
 
 
 def evaluate(clf, results, target, heading):
@@ -65,7 +62,7 @@ def main(argv):
 
 
 
-    with open('./output/prediction_svm.csv', 'wb') as csvfile:
+    with open('./prediction_logit.csv', 'wb') as csvfile:
         writer = csv.writer(csvfile)
         writer.writerow(['PassengerId', 'Survived'])
         for i in xrange(len(results)):
