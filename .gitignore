@@ -1,11 +1,11 @@
 **/.DS_STORE
 **/.RData
+
 **/*.dat
 **/*.mp4
 **/*.pyc
 **/*.py[cod]
 
-**/data
 **/*.zip
 
 *.egg
