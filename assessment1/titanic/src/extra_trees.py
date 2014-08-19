@@ -1,20 +1,13 @@
 import sys
 import csv
 
-from sklearn import preprocessing, feature_selection, cross_validation, metrics, svm
+from sklearn import preprocessing, cross_validation, metrics, ensemble
 from clean import clean_data
 from feature_select import select_features
 
 
 def fit_model(data, target):
-    # clf = svm.NuSVC(gamma = 0.25, nu = 0.5)
-    clf = svm.SVC(gamma = 0.25, C = 1)
-    # clf = svm.SVC(gamma = 0.25, C = 5., class_weight = 'auto')
-    # clf = svm.SVC(kernel = 'poly', gamma = 0.25, degree = 2, C = 5.)
-    # clf = svm.SVC(kernel = 'rbf', gamma = 0.25, C = 5.)
-    # clf = svm.SVC(kernel = 'rbf', gamma = 0.01, C = 100)
-    # clf = svm.SVC(kernel = 'sigmoid', gamma = 0.25, C = 5000.)
-    # clf = svm.LinearSVC(C = 5)
+    clf = ensemble.ExtraTreesClassifier(criterion = 'entropy')
     clf.fit(data, target)
 
     return clf
@@ -68,7 +61,7 @@ def main(argv):
     results = clf.predict(X)
 
 
-    with open('./output/prediction_svm.csv', 'wb') as csvfile:
+    with open('./output/prediction_tree.csv', 'wb') as csvfile:
         writer = csv.writer(csvfile)
         writer.writerow(['PassengerId', 'Survived'])
         for i in xrange(len(results)):

@@ -9,7 +9,7 @@ from scipy.stats import mode
 def clean_data(file_path):
     df = pd.read_csv(file_path)
 
-    classMedians = df.pivot_table('Fare', columns = 'Pclass', aggfunc = 'median')
+    classMedians = df.pivot_table('Fare', cols = 'Pclass', aggfunc = 'median')
     modeEmbarked = mode(df.Embarked)[0][0]
     embarked     = {'S': 0, 'C': 1, 'Q': 2}
 

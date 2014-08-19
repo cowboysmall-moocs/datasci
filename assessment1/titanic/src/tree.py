@@ -7,7 +7,7 @@ from feature_select import select_features
 
 
 def fit_model(data, target):
-    clf = tree.DecisionTreeClassifier(criterion = 'gini')
+    clf = tree.DecisionTreeClassifier(criterion = 'entropy')
     clf.fit(data, target)
 
     return clf
@@ -45,7 +45,7 @@ def main(argv):
     print
     print 'Cross Validation: Training Data'
     print
-    print metrics.classification_report(y, results)
+    print metrics.classification_report(y.values, results)
     print
     print 'Cross Validation: Score = ', cross_validation.cross_val_score(clf, X, y).mean()
     print
@@ -61,7 +61,7 @@ def main(argv):
     results = clf.predict(X)
 
 
-    with open('./prediction_tree.csv', 'wb') as csvfile:
+    with open('./output/prediction_tree.csv', 'wb') as csvfile:
         writer = csv.writer(csvfile)
         writer.writerow(['PassengerId', 'Survived'])
         for i in xrange(len(results)):
