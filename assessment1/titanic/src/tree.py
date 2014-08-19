@@ -1,65 +1,64 @@
 import sys
 import csv
 
-from sklearn import metrics, tree
+from sklearn import preprocessing, cross_validation, metrics, tree
 from clean import clean_data
+from feature_select import select_features
 
 
 def fit_model(data, target):
-    decisiom_tree = tree.DecisionTreeClassifier(criterion = "entropy")
-    decisiom_tree.fit(data, target)
+    clf = tree.DecisionTreeClassifier(criterion = 'gini')
+    clf.fit(data, target)
 
-    return decisiom_tree
-
-
-def evaluate(clf, results, target, heading):
-    positive = 0
-    negative = 0
-
-    for i in xrange(len(results)):
-        if results[i] == target[i]:
-            positive += 1
-        else:
-            negative += 1
-
-    print
-    print '%s: ' % (heading)
-    print 'Positive: %s, Negative: %s, Perentage: %s' % (positive, negative, float(positive) / len(results))
-    print
-    print metrics.classification_report(target, results)
-    print
+    return clf
 
 
 def main(argv):
-    df = clean_data(argv[0])
-
-    target = df['Survived'].values
-    data   = df.drop(['PassengerId', 'Name', 'Ticket', 'Cabin', 'Fare', 'Survived'], 1).values
-
-    total       = len(data)
-    train_count = int(total * 0.6)
-    cv_count    = int(total * 0.8)
+    df        = clean_data(argv[0])
+    X         = df.drop(['PassengerId', 'Survived'], 1)
+    y         = df['Survived']
+    selection = select_features(X, y)
+    X         = selection.transform(X)
+    X         = preprocessing.scale(X)
 
 
-
-    clf = fit_model(data[:train_count], target[:train_count])
-
-    results = clf.predict(data[train_count:cv_count])
-    evaluate(clf, results, target[train_count:cv_count], 'Cross Validation')
-
-    results = clf.predict(data[cv_count:])
-    evaluate(clf, results, target[cv_count:], 'Test')
+    data_train, data_test, target_train, target_test = cross_validation.train_test_split(X, y, train_size = 0.8)
 
 
+    clf     = fit_model(data_train, target_train)
+    results = clf.predict(data_test)
 
-    clf = fit_model(data, target)
 
-    df2  = clean_data(argv[1])
-    ids  = df2['PassengerId'].values
-    data = df2.drop(['PassengerId', 'Name', 'Ticket', 'Cabin', 'Fare'], 1).values
+    print
+    print 'Cross Validation: Test Data'
+    print
+    print metrics.classification_report(target_test, results)
+    print
+    print 'Cross Validation: Score = ', cross_validation.cross_val_score(clf, data_test, target_test).mean()
+    print
 
-    results = clf.predict(data)
 
+    clf     = fit_model(X, y)
+    results = clf.predict(X)
+
+
+    print
+    print 'Cross Validation: Training Data'
+    print
+    print metrics.classification_report(y, results)
+    print
+    print 'Cross Validation: Score = ', cross_validation.cross_val_score(clf, X, y).mean()
+    print
+
+
+    df  = clean_data(argv[1])
+    X   = df.drop(['PassengerId'], 1)
+    X   = selection.transform(X)
+    X   = preprocessing.scale(X)
+    ids = df['PassengerId'].values
+
+
+    results = clf.predict(X)
 
 
     with open('./prediction_tree.csv', 'wb') as csvfile:

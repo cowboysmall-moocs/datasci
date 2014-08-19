@@ -1,18 +1,13 @@
 import sys
 import csv
 
-from sklearn import preprocessing, feature_selection, cross_validation, metrics, svm
+from sklearn import preprocessing, cross_validation, metrics, ensemble
 from clean import clean_data
 from feature_select import select_features
 
 
 def fit_model(data, target):
-    clf = svm.SVC(gamma = 0.25, C = 5.)
-    # clf = svm.SVC(gamma = 0.25, C = 5., class_weight = 'auto')
-    # clf = svm.SVC(kernel = 'poly', gamma = 0.01, degree = 3, C = 50.)
-    # clf = svm.SVC(kernel = 'rbf', gamma = 0.1, C = 1.)
-    # clf = svm.SVC(kernel = 'sigmoid', gamma = 0.01, C = 5.)
-    # clf = svm.LinearSVC(C = 5)
+    clf = ensemble.AdaBoostClassifier(n_estimators = 100)
     clf.fit(data, target)
 
     return clf
@@ -66,7 +61,7 @@ def main(argv):
     results = clf.predict(X)
 
 
-    with open('./prediction_svm.csv', 'wb') as csvfile:
+    with open('./prediction_ab.csv', 'wb') as csvfile:
         writer = csv.writer(csvfile)
         writer.writerow(['PassengerId', 'Survived'])
         for i in xrange(len(results)):
