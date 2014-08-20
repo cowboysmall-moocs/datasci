@@ -26,9 +26,11 @@ def select_features(X, y):
         print '%10s: score = %8.2f, pvalue = %8.2f' % (X.columns[i], selection.scores_[i], selection.pvalues_[i])
     print
 
-    selection = feature_selection.RFECV(svm.LinearSVC(C = 5))
+    selection = feature_selection.RFECV(svm.LinearSVC())
     selection = selection.fit(X.values, y.values)
 
+    print
+    print 'Feature Ranking (Recursive Feature Elimination):'
     print
     for i in range(len(X.columns)):
         print '%10s: support = %8.2f, ranking = %8.2f' % (X.columns[i], selection.support_[i], selection.ranking_[i])

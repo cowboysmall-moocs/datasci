@@ -17,8 +17,8 @@ def main(argv):
     df        = clean_data(argv[0])
     X         = df.drop(['PassengerId', 'Survived'], 1)
     y         = df['Survived']
-    selection = select_features(X, y)
-    X         = selection.transform(X)
+    # selection = select_features(X, y)
+    # X         = selection.transform(X)
     X         = preprocessing.scale(X)
 
 
@@ -53,7 +53,7 @@ def main(argv):
 
     df  = clean_data(argv[1])
     X   = df.drop(['PassengerId'], 1)
-    X   = selection.transform(X)
+    # X   = selection.transform(X)
     X   = preprocessing.scale(X)
     ids = df['PassengerId'].values
 

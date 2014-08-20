@@ -1,21 +1,24 @@
 import sys
 import csv
 
-from sklearn import preprocessing, feature_selection, cross_validation, metrics, svm
+from sklearn import preprocessing, feature_selection, grid_search, cross_validation, metrics, svm
 from clean import clean_data
 from feature_select import select_features
 
 
 def fit_model(data, target):
-    # clf = svm.NuSVC(gamma = 0.25, nu = 0.5)
-    clf = svm.SVC(gamma = 0.25, C = 1)
-    # clf = svm.SVC(gamma = 0.25, C = 5., class_weight = 'auto')
-    # clf = svm.SVC(kernel = 'poly', gamma = 0.25, degree = 2, C = 5.)
-    # clf = svm.SVC(kernel = 'rbf', gamma = 0.25, C = 5.)
-    # clf = svm.SVC(kernel = 'rbf', gamma = 0.01, C = 100)
-    # clf = svm.SVC(kernel = 'sigmoid', gamma = 0.25, C = 5000.)
-    # clf = svm.LinearSVC(C = 5)
+    # clf = svm.SVC(gamma = 0.25, C = 1)
+
+    parameters_grid = [
+        {'C': [1, 5, 10, 50, 100, 500, 1000], 'kernel': ['linear']},
+        {'C': [1, 5, 10, 50, 100, 500, 1000], 'kernel': ['rbf'], 'gamma': [1, 0.5, 0.25, 0.1, 0.01, 0.001, 0.0001]},
+        {'C': [1, 5, 10, 50, 100, 500, 1000], 'kernel': ['poly'], 'gamma': [1, 0.5, 0.25, 0.1, 0.01, 0.001, 0.0001], 'degree': [1, 2, 3]},
+        {'C': [1, 5, 10, 50, 100, 500, 1000], 'kernel': ['sigmoid'], 'gamma': [1, 0.5, 0.25, 0.1, 0.01, 0.001, 0.0001]},
+    ]
+    clf = grid_search.GridSearchCV(svm.SVC(), parameters_grid)
     clf.fit(data, target)
+
+    print clf.get_params()
 
     return clf
 
@@ -24,8 +27,8 @@ def main(argv):
     df        = clean_data(argv[0])
     X         = df.drop(['PassengerId', 'Survived'], 1)
     y         = df['Survived']
-    selection = select_features(X, y)
-    X         = selection.transform(X)
+    # selection = select_features(X, y)
+    # X         = selection.transform(X)
     X         = preprocessing.scale(X)
 
 
@@ -60,7 +63,7 @@ def main(argv):
 
     df  = clean_data(argv[1])
     X   = df.drop(['PassengerId'], 1)
-    X   = selection.transform(X)
+    # X   = selection.transform(X)
     X   = preprocessing.scale(X)
     ids = df['PassengerId'].values
 
@@ -77,3 +80,13 @@ def main(argv):
 
 if __name__ == '__main__':
     main(sys.argv[1:])
+
+
+
+# clf = svm.NuSVC(gamma = 0.25, nu = 0.5)
+# clf = svm.SVC(gamma = 0.25, C = 5., class_weight = 'auto')
+# clf = svm.SVC(kernel = 'poly', gamma = 0.25, degree = 2, C = 5.)
+# clf = svm.SVC(kernel = 'rbf', gamma = 0.25, C = 5.)
+# clf = svm.SVC(kernel = 'rbf', gamma = 0.01, C = 100)
+# clf = svm.SVC(kernel = 'sigmoid', gamma = 0.25, C = 5000.)
+# clf = svm.LinearSVC(C = 5)
