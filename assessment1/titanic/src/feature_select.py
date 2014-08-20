@@ -1,8 +1,8 @@
 import sys
-import csv
 
 from sklearn import feature_selection, svm
 from clean import clean_data
+
 
 
 def select_features(X, y):
@@ -37,6 +37,7 @@ def select_features(X, y):
     print
 
     return selection
+
 
 
 def main(argv):
