@@ -16,11 +16,11 @@ def select_features(X, y):
         print '%10s: score = %8.2f, pvalue = %8.2f' % (X.columns[i], selection.scores_[i], selection.pvalues_[i])
     print
 
-    selection = feature_selection.SelectKBest(score_func = feature_selection.f_regression, k = 'all')
+    selection = feature_selection.SelectKBest(score_func = feature_selection.f_classif, k = 'all')
     selection = selection.fit(X.values, y.values)
 
     print
-    print 'Univariate Linear Regression:'
+    print 'Anova F-Value:'
     print
     for i in range(len(X.columns)):
         print '%10s: score = %8.2f, pvalue = %8.2f' % (X.columns[i], selection.scores_[i], selection.pvalues_[i])

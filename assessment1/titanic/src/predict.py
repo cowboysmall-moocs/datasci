@@ -26,7 +26,7 @@ def make_prediction(df_train, df_test, fit_model = fit_dummy, output_file = './o
     X = preprocessing.scale(df_train.drop(['PassengerId', 'Survived'], 1))
     y = df_train['Survived']
 
-    X_train, X_test, y_train, y_test = cross_validation.train_test_split(X, y, train_size = 0.5)
+    X_train, X_test, y_train, y_test = cross_validation.train_test_split(X, y, train_size = 0.8)
 
     clf     = fit_model(X_train, y_train)
     results = clf.predict(X_test)

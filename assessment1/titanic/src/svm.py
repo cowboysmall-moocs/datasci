@@ -6,7 +6,6 @@ from predict import make_prediction
 
 
 def fit_svm(X, y):
-    # clf = svm.SVC(gamma = 0.25, C = 1)
     clf = svm.SVC(gamma = 0.05, C = 5)
     clf.fit(X, y)
 
